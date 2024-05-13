@@ -1,0 +1,9 @@
+https://www.youtube.com/watch?v=Sv0j3YCOnAY&t=4398s
+https://www.bootstrapcdn.com/
+https://bootswatch.com/minty/
+https://github.com/axios/axios
+
+composer create-project laravel/laravel:10.* laravel_queue
+
+php artisan queue:table
+php artisan make:job ProcessPersons
