@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ProcessPersons;
 use Illuminate\Http\Request;
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
 
 class UploadController extends Controller
 {
@@ -35,8 +37,8 @@ class UploadController extends Controller
                 
                 $header = null;
                 $dataFromCsv = [];
-                $records = array_map('str_getcsv', file($fileWithPath), [";"]);
-                //dd($records);
+                $records = array_map('str_getcsv', file($fileWithPath));
+                dd($records);
                 foreach($records as $record)
                 {
 \Log::info($record);
