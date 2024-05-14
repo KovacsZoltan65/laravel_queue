@@ -20,7 +20,7 @@ class ProcessPersons implements ShouldQueue
     public function __construct($personsData)
     {
         $this->personsData = $personsData;
-        dd($this->personsData);
+        //dd($this->personsData);
     }
 
     /**
@@ -30,13 +30,16 @@ class ProcessPersons implements ShouldQueue
     {
         try
         {
-//            foreach( $this->personsData as $person )
-//            {
-//                $new_person = new Person();
-//                $new_person->name = $person->name;
-//                $new_person->email = $person->email;
-//                $new_person->password = $person->password;
-//            }
+            foreach( $this->personsData as $person )
+            {
+\Log::info('$person: ' . print_r($person, true));
+                \App\Models\Person::create($person);
+                //$new_person = new Person();
+                //$new_person->name = $person->name;
+                //$new_person->email = $person->email;
+                //$new_person->password = $person->password;
+                //$new_person->save();
+            }
         }
         catch( \Exception $e )
         {

@@ -38,10 +38,9 @@ class UploadController extends Controller
                 $header = null;
                 $dataFromCsv = [];
                 $records = array_map('str_getcsv', file($fileWithPath));
-                dd($records);
+
                 foreach($records as $record)
                 {
-\Log::info($record);
                     if( !$header )
                     {
                         $header = $record;
@@ -52,8 +51,10 @@ class UploadController extends Controller
                     }
                 }
             }
-            dd($dataFromCsv);
+            
             $dataFromCsv = array_chunk($dataFromCsv, 300);
+            
+            $batch = Bus::batch([])->dispatch();
             
             $personsData = [];
             
@@ -61,26 +62,19 @@ class UploadController extends Controller
             {
                 foreach( $dataCsv as $data )
                 {
-                    try
-                    {
-                        $personsData[$index][] = array_combine($header, $data);
-                    }catch( \Exception $e )
-                    {
-                        print_r('error');
-                        print_r($data);
-                        continue;
-                    }
+                    $personsData[$index][] = array_combine($header, $data);
                 }
                 
-                ProcessPersons::dispatch($personsData[$index]);
+                $batch->add(new ProcessPersons($personsData[$index]));
+                //ProcessPersons::dispatch($personsData[$index]);
             }
             
-            //dd($personsData);
+            return $batch;
         }
         catch( \Exception $e )
         {
             \Log::error( $e->getMessage() );
-            dd($e->getMessaget());
+            dd($e->getMessage());
         }
     }
 

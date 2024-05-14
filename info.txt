@@ -6,4 +6,9 @@ https://github.com/axios/axios
 composer create-project laravel/laravel:10.* laravel_queue
 
 php artisan queue:table
+php artisan queue:batches-table
+php artisan migrate
+
 php artisan make:job ProcessPersons
+
+php artisan queue:work
