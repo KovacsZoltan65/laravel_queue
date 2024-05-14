@@ -69,7 +69,9 @@ class UploadController extends Controller
                 //ProcessPersons::dispatch($personsData[$index]);
             }
             
-            return $batch;
+            session()->put('lastBatchId', $batch->id);
+            
+            return redirect('/progress?id=' . $batch->id);
         }
         catch( \Exception $e )
         {
