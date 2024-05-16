@@ -64,27 +64,29 @@
                         const urlSearchParams = new URLSearchParams(window.location.search);
                         const params = Object.fromEntries(urlSearchParams.entries());
                         
-                        if(params.id)
-                        {
-                            this.params.id = params.id;
-                        }
+                        //if(params.id)
+                        //{
+                        //    this.params.id = params.id;
+                        //}
                     },
                     getUploadProgress()
                     {
-                        this.checkIfIdPresent();
+                        //this.checkIfIdPresent();
                         
-                        let progressResponse = setInterval(() => {
-                            axios.get('/progress/data', {
-                                
-                            }).then();
-                        }, 1000),
+                        //let progressResponse = setInterval(() => {
+                        //    axios.get('/progress/data', {
+                        //        
+                        //    }).then();
+                        //}, 1000),
                     }
                 },
                 created(){
-                    this.checkIfIdPresent();
+                    this.getUploadProgress();
                 }
             };
-            Vue.createApp(app).mount('#app')
+
+            Vue.createApp(app).mount('#app');
+
         </script>
     </body>
 </html>

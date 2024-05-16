@@ -24,14 +24,11 @@ class UploadController extends Controller
 
     public function uploadAndStore(Request $request)
     {
-        try
-        {
-            if( $request->has('csvFile') )
-            {
+        try {
+            if( $request->has('csvFile') ) {
                 $fileName = $request->csvFile->getClientOriginalName();
                 $fileWithPath = public_path('uploads') . '/' . $fileName;
-                if( !file_exists($fileWithPath) )
-                {
+                if( !file_exists($fileWithPath) ) {
                     $request->csvFile->move(public_path('uploads'), $fileName);
                 }
                 
@@ -39,14 +36,11 @@ class UploadController extends Controller
                 $dataFromCsv = [];
                 $records = array_map('str_getcsv', file($fileWithPath));
 
-                foreach($records as $record)
-                {
-                    if( !$header )
-                    {
+                foreach($records as $record) {
+                    if( !$header ) {
                         $header = $record;
                     }
-                    else
-                    {
+                    else {
                         $dataFromCsv[] = $record;
                     }
                 }
@@ -58,10 +52,8 @@ class UploadController extends Controller
             
             $personsData = [];
             
-            foreach( $dataFromCsv as $index => $dataCsv )
-            {
-                foreach( $dataCsv as $data )
-                {
+            foreach( $dataFromCsv as $index => $dataCsv ) {
+                foreach( $dataCsv as $data ) {
                     $personsData[$index][] = array_combine($header, $data);
                 }
                 
@@ -73,8 +65,7 @@ class UploadController extends Controller
             
             return redirect('/progress?id=' . $batch->id);
         }
-        catch( \Exception $e )
-        {
+        catch( \Exception $e ) {
             \Log::error( $e->getMessage() );
             dd($e->getMessage());
         }

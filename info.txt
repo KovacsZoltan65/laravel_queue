@@ -11,4 +11,10 @@ php artisan migrate
 
 php artisan make:job ProcessPersons
 
+// -------------
+// SZOLGÁLTATÓK
+// -------------
+php artisan serve
 php artisan queue:work
+
+00:57:00
