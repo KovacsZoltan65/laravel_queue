@@ -33,6 +33,6 @@ Route::post(
 )->name('processFile');
 
 Route::get(
-    '', 
+    '/progress/data', 
     [UploadController::class, 'progressForCsvStoreProcess']
 )->name('csvStoreProcess');

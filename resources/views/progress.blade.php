@@ -33,8 +33,13 @@
             <hr/>
             <div class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                     role="progressbar" aria-valuenow="75" aria-valuemin="0" 
-                     aria-valuemax="100" style="width: 60%;"></div>
+                     role="progressbar" 
+                     :aria-valuenow="progressPercentage" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100" 
+                     :style="`width: ${progressPercentage}%;`">
+                    @{{ progressPercentage }}%
+                </div>
             </div>
         </div>
 
@@ -70,7 +75,7 @@
                     },
                     getUploadProgress() {
                         let self = this;
-                        this.checkIfIdPresent();
+                        self.checkIfIdPresent();
                         
                         let progressResponse = setInterval(() => {
                             axios.get('/progress/data', {
@@ -81,6 +86,20 @@
                                 }
                             }).then((response) => {
                                 console.log('response.data', response.data);
+
+                                let totalJobs = parseInt(response.data.total_jobs);
+                                let pendingJobs = parseInt(response.data.pending_jobs);
+                                let completedJobs = totalJobs - pendingJobs;
+
+                                if( pendingJobs == 0 ) {
+                                    self.progressPercentage = 100;
+                                } else {
+                                    self.progressPercentage = parseInt(completedJobs / totalJobs * 100).toFixed(0);
+                                }
+
+                                if( parseInt(self.progressPercentage) >= 100 ) {
+                                    clearInterval(progressResponse);
+                                }
                             });
                         }, 1000);
                     }
