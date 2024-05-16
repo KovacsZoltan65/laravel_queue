@@ -31,3 +31,8 @@ Route::post(
     '/upload/file', 
     [UploadController::class, 'uploadAndStore']
 )->name('processFile');
+
+Route::get(
+    '', 
+    [UploadController::class, 'progressForCsvStoreProcess']
+)->name('csvStoreProcess');

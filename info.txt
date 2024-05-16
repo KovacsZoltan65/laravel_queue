@@ -10,6 +10,7 @@ php artisan queue:batches-table
 php artisan migrate
 
 php artisan make:job ProcessPersons
+php artisan make:model JobBatch
 
 // -------------
 // SZOLGÁLTATÓK

@@ -59,25 +59,30 @@
                     }
                 },
                 methods: {
-                    checkIfIdPresent()
-                    {
+                    checkIfIdPresent() {
                         const urlSearchParams = new URLSearchParams(window.location.search);
                         const params = Object.fromEntries(urlSearchParams.entries());
                         
-                        //if(params.id)
-                        //{
-                        //    this.params.id = params.id;
-                        //}
+                        //console.log(params);
+                        if(params.id) {
+                            this.params.id = params.id;
+                        }
                     },
-                    getUploadProgress()
-                    {
-                        //this.checkIfIdPresent();
+                    getUploadProgress() {
+                        let self = this;
+                        this.checkIfIdPresent();
                         
-                        //let progressResponse = setInterval(() => {
-                        //    axios.get('/progress/data', {
-                        //        
-                        //    }).then();
-                        //}, 1000),
+                        let progressResponse = setInterval(() => {
+                            axios.get('/progress/data', {
+                                params: {
+                                    id: self.params.id 
+                                        ? self.params.id 
+                                        : "{{ session()->get('lastBatchId') }}"
+                                }
+                            }).then((response) => {
+                                console.log('response.data', response.data);
+                            });
+                        }, 1000);
                     }
                 },
                 created(){

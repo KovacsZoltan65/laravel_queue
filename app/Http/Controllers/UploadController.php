@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JobBatch;
+use Illuminate\Bus\Batch;
 use App\Jobs\ProcessPersons;
 use Illuminate\Http\Request;
-use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 
 class UploadController extends Controller
@@ -68,6 +69,20 @@ class UploadController extends Controller
         catch( \Exception $e ) {
             \Log::error( $e->getMessage() );
             dd($e->getMessage());
+        }
+    }
+
+    public function progressForCsvStoreProcess(Request $request)
+    {
+        try{
+            $batchId = $request->id ?? session()->get('lastBatchId');
+            if(JobBatch::where('id', $batchId)->count()) {
+                $response = JobBatch::where('id', $batchId)->first();
+                return response()->json($response);
+            }
+        }catch( \Exception $e ){
+            \Log::error($e);
+            dd('UploadController@progressForCsvStoreProcess error: ', $e->getMessage());
         }
     }
 
