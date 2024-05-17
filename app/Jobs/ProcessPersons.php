@@ -13,50 +13,37 @@ class ProcessPersons implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * A feldolgozandó személyek adatai.
-     *
-     * @var array
-     */
-    public array $personsData;
-
+    public $personsData;
     /**
      * Create a new job instance.
      */
     public function __construct($personsData)
     {
-        /**
-         * Tárolja a személyek adatait az osztálytulajdonban.
-         *
-         * @param array $personsData A kezelendő személyek adatai.
-         */
         $this->personsData = $personsData;
+        //dd($this->personsData);
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
-        // Ismételje meg az egyes személyek adatait, és hozzon létre egy új személymodell-példányt.
-        // Ha kivétel történik, naplózza a hibaüzenetet, és állítsa le a parancsfájl végrehajtását.
         try
         {
             foreach( $this->personsData as $person )
             {
-                try{
-                    // Hozzon létre egy új személymodell példányt a megadott személyadatokkal.
-                    $personModel = \App\Models\Person::create($person);
-                }
-                catch( \Exception $e ){
-                    // Naplózza a hibaüzenetet, és állítsa le a szkript végrehajtását.
-                    \Log::info('ProcessPersons@handle error: ' . print_r($e->getMessage(), true));
-                    dd($e->getMessage());
-                }
+\Log::info('$person: ' . print_r($person, true));
+                \App\Models\Person::create($person);
+                //$new_person = new Person();
+                //$new_person->name = $person->name;
+                //$new_person->email = $person->email;
+                //$new_person->password = $person->password;
+                //$new_person->save();
             }
         }
         catch( \Exception $e )
         {
-            // Naplózza a hibaüzenetet, és állítsa le a szkript végrehajtását.
-            \Log::info('ProcessPersons@handle error: ' . print_r($e->getMessage(), true));
-            dd($e->getMessage());
+            //
         }
     }
 }
