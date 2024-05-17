@@ -48,44 +48,44 @@ class UploadController extends Controller
         try {
 
             /**
-             * Check if the request has a CSV file.
+             * Ellenőrizze, hogy a kérelem tartalmaz-e CSV-fájlt.
              *
-             * @param \Illuminate\Http\Request $request The HTTP request object.
-             * @return bool Returns true if the request has a CSV file, false otherwise.
+             * @param \Illuminate\Http\Request $request A HTTP kérés objektuma.
+             * @return bool Igaz értéket ad vissza, ha a kérés CSV-fájlt tartalmaz, egyébként false értéket.
              */
-            // Check if the request has a CSV file
+            // Ellenőrizze, hogy a kérelem tartalmaz-e CSV-fájlt
             if ($request->has('csvFile')) {
 
-                // Get the original name of the uploaded CSV file
                 /**
-                 * The original name of the uploaded CSV file.
+                 * A feltöltött CSV-fájl eredeti neve.
                  *
                  * @var string
                  */
                 $fileName = $request->csvFile->getClientOriginalName();
-                // Add comments to explain the purpose of the code
-                // We use the getClientOriginalName() method to get the original name of the uploaded file
-                // This is useful because it allows us to store the file with its original name
-                // and not just use a randomly generated name
+
+                // A getClientOriginalName() metódust használjuk a feltöltött fájl 
+                // eredeti nevének lekérésére. Ez azért hasznos, mert lehetővé teszi, 
+                // hogy a fájlt az eredeti nevével tároljuk, és ne csak véletlenszerűen 
+                // generált nevet használjunk
                 
-                // Build the file path by concatenating the uploads directory path
-                // and the name of the uploaded file.
+                // Építse fel a fájl elérési útját a feltöltési könyvtár elérési útjának 
+                // és a feltöltött fájl nevének összefűzésével.
                 /**
-                 * The file path to the uploaded CSV file.
+                 * A feltöltött CSV-fájl elérési útja.
                  *
                  * @var string
                  */
                 $fileWithPath = public_path('uploads') . '/' . $fileName;
 
-                // Check if the file already exists in the specified path
-                // If the file does not exist, move the uploaded file to the specified path
+                // Ellenőrizze, hogy a fájl létezik-e már a megadott elérési úton
+                // Ha a fájl nem létezik, helyezze át a feltöltött fájlt a megadott elérési útra
                 if( !file_exists($fileWithPath) ) {
                     /**
-                     * Moves the uploaded file to the specified path.
+                     * Áthelyezi a feltöltött fájlt a megadott útvonalra.
                      *
-                     * @param string $destinationPath The path to move the file to.
-                     * @param string $fileName The name of the file to be moved.
-                     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException If the file is not found.
+                     * @param string $destinationPath A fájl áthelyezésének elérési útja.
+                     * @param string $fileName Az áthelyezendő fájl neve.
+                     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException Ha a fájl nem található.
                      * @return void
                      */
                     $request->csvFile->move(public_path('uploads'), $fileName);
@@ -110,36 +110,45 @@ class UploadController extends Controller
                 //$records = array_map('str_getcsv', file($fileWithPath));
                 
                 /**
-                 * Maps the CSV records to an array of arrays.
+                 * A CSV-rekordokat tömbök tömbjéhez rendeli hozzá.
                  *
-                 * @param string $separator The separator used in the CSV file.
-                 * @return array An array of arrays, where each inner array represents a record.
+                 * @param string $separator A CSV-fájlban használt elválasztó.
+                 * @return array Tömbök tömbje, ahol minden belső tömb egy rekordot jelöl.
                  */
                 $records = array_map(function($v) use($separator) {
-                    // Call str_getcsv with the separator to split the record into an array
+                    // Hívja az str_getcsv-t az elválasztóval a rekord tömbre való felosztásához
                     return str_getcsv($v, $separator);
                 }, file($fileWithPath));
-                // The array_map function applies the given callback function to each element of the array.
-                // In this case, the callback function is an anonymous function that uses the $separator variable
-                // to split the record into an array of values.
-                // The result is an array of arrays, where each inner array represents a record.
+                // Az array_map függvény a megadott visszahívási függvényt alkalmazza a tömb minden elemére.
+                // Ebben az esetben a visszahívási függvény egy névtelen függvény, amely a $separator változót használja
+                // hogy a rekordot értékek tömbjére ossza fel.
+                // Az eredmény egy tömbtömb, ahol minden belső tömb egy rekordot jelent.
 
+                /**
+                 * Tárolja a CSV-fájl fejlécét.
+                 * A CSV-fájl fejlécének tárolására szolgál.
+                 *
+                 * @var array
+                 */
+                $header = array_shift($records);
 
-                // Iterate over each record in the CSV file
+                
+                // Végigjárja a CSV-fájl minden rekordját
                 foreach($records as $record) {
+                    $dataFromCsv[] = array_combine($header, $record);
                     /**
                      * Check if the header is not set.
-                     * If the header is not set, set it to the current record.
-                     * Otherwise, add the record to the dataFromCsv array.
+                     * Ha a fejléc nincs beállítva, állítsa be az aktuális rekordra.
+                     * Ellenkező esetben adja hozzá a rekordot a dataFromCsv tömbhöz.
                      */
-                    if( !$header ) {
+                //    if( !$header ) {
                         // Set the header to the current record
-                        $header = $record;
-                    }
-                    else {
+                //        $header = $record;
+                //    }
+                //    else {
                         // Add the record to the dataFromCsv array
-                        $dataFromCsv[] = $record;
-                    }
+                //        $dataFromCsv[] = $record;
+                //    }
                 }
             }
             
