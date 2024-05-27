@@ -242,6 +242,14 @@ class UploadController extends Controller
         }
     }
 
+    public function import(Request $request)
+    {
+        $file = $request->file('file');
+        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\PersonImport(), $file);
+        
+        return back()->with('success', 'CSV fájl importálása sikeres.');
+    }
+    
     /**
      * Show the form for creating a new resource.
      */

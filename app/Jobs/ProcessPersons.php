@@ -46,13 +46,13 @@ class ProcessPersons implements ShouldQueue
             foreach( $this->personsData as $person )
             {
                 // Hozzon létre egy új személymodell példányt a megadott személyadatokkal.
-                //\App\Models\Person::create($person);
+                \App\Models\Person::create($person);
                 
                 // Létrehozás vagy frissítés
-                \App\Models\Person::updateOrCreate(
-                    ['name' => $person->name, 'email' => $person->email], 
-                    ['password' => $person->password]
-                );
+                //\App\Models\Person::updateOrCreate(
+                //    ['name' => $person->name, 'email' => $person->email], 
+                //    ['password' => $person->password]
+                //);
             }
         }
         catch( \Exception $e )
