@@ -19,6 +19,9 @@
         <li class="nav-item">
           <a class="nav-link" href="{{ url('/upload') }}">Upload</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url('/import') }}">Excel Import</a>
+        </li>
       </ul>
     </div>
   </div>

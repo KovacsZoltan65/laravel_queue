@@ -37,5 +37,5 @@ Route::get(
     [UploadController::class, 'progressForCsvStoreProcess']
 )->name('csvStoreProcess');
 
-Route::get('import', [UploadController::class, 'show']);
+Route::get('import', [UploadController::class, 'show_import']);
 Route::post('import', [UploadController::class, 'import'])->name('import');

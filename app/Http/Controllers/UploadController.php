@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\JobBatch;
-use Illuminate\Bus\Batch;
+use App\Imports\PersonImport;
 use App\Jobs\ProcessPersons;
+use App\Models\JobBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Session;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UploadController extends Controller
 {
@@ -22,6 +24,11 @@ class UploadController extends Controller
     {
         return view('progress');
     }
+    
+    public function show_import()
+    {
+        return view('import');
+    }
 
     public function uploadAndStore(Request $request)
     {
@@ -36,7 +43,7 @@ class UploadController extends Controller
         /**
          * Állítsa be az elválasztót a kérés értékére, ha meg van adva.
          *
-         * @param \Illuminate\Http\Request $request A HTTP kérés objektuma.
+         * @param Request $request A HTTP kérés objektuma.
          * @return void
          */
         // Ellenőrizze, hogy az elválasztó megadva van-e a kérelemben
@@ -50,7 +57,7 @@ class UploadController extends Controller
             /**
              * Ellenőrizze, hogy a kérelem tartalmaz-e CSV-fájlt.
              *
-             * @param \Illuminate\Http\Request $request A HTTP kérés objektuma.
+             * @param Request $request A HTTP kérés objektuma.
              * @return bool Igaz értéket ad vissza, ha a kérés CSV-fájlt tartalmaz, egyébként false értéket.
              */
             // Ellenőrizze, hogy a kérelem tartalmaz-e CSV-fájlt
@@ -189,7 +196,7 @@ class UploadController extends Controller
              * Ez a CSV-fájl feldolgozása után a felhasználó 
              * átirányítására szolgál a folyamatoldalra.
              *
-             * @param \Illuminate\Support\Facades\Session $session A munkamenet-példány.
+             * @param Session $session A munkamenet-példány.
              * @param string                              $id      Az utolsó köteg azonosítója.
              * @return void
              */
@@ -219,7 +226,7 @@ class UploadController extends Controller
      * Ezután ellenőrzi, hogy létezik-e a megadott azonosítóval rendelkező köteg.
      * Ha igen, akkor JSON-válaszként adja vissza a köteg részleteit.
      *
-     * @param \Illuminate\Http\Request          $request A HTTP kérés objektuma.
+     * @param Request          $request A HTTP kérés objektuma.
      * @return \Illuminate\Http\JsonResponse    A köteg részleteit tartalmazó JSON-válasz.
      */
     public function progressForCsvStoreProcess(Request $request)
@@ -244,8 +251,22 @@ class UploadController extends Controller
 
     public function import(Request $request)
     {
-        $file = $request->file('file');
-        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\PersonImport(), $file);
+        if($request->has('file')) {
+            $fileName = $request->file->getClientOriginalName();
+            $fileWithPath = public_path('uploads') . '/' . $fileName;
+            
+            if( !file_exists($fileWithPath) ) {
+                //
+                $request->file->move(public_path('uploads'), $fileName);
+            }
+        }
+        
+        Excel::import(new PersonImport(), $fileWithPath);
+        
+        
+        //$file = $request->file('file');
+        //dd($file);
+        //Excel::import(new PersonImport(), $file);
         
         return back()->with('success', 'CSV fájl importálása sikeres.');
     }

@@ -21,7 +21,7 @@ class ProcessPersons implements ShouldQueue
     public $personsData;
 
     /**
-     * Create a new job instance.
+     * Hozzon létre egy új feladatpéldányt.
      */
     public function __construct($personsData)
     {
@@ -35,7 +35,7 @@ class ProcessPersons implements ShouldQueue
     }
 
     /**
-     * Execute the job.
+     * Hajtsa végre a feladatot.
      */
     public function handle(): void
     {
