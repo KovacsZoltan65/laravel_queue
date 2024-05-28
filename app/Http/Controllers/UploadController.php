@@ -65,27 +65,28 @@ class UploadController extends Controller
 
                 /**
                  * A feltöltött CSV-fájl eredeti neve.
+                 * A getClientOriginalName() metódust használjuk a feltöltött fájl
+                 * eredeti nevének lekérésére. Ez azért hasznos, mert lehetővé teszi,
+                 * hogy a fájlt az eredeti nevével tároljuk, és ne csak véletlenszerűen 
+                 * generált nevet használjunk
                  *
                  * @var string
                  */
                 $fileName = $request->csvFile->getClientOriginalName();
 
-                // A getClientOriginalName() metódust használjuk a feltöltött fájl 
-                // eredeti nevének lekérésére. Ez azért hasznos, mert lehetővé teszi, 
-                // hogy a fájlt az eredeti nevével tároljuk, és ne csak véletlenszerűen 
-                // generált nevet használjunk
-                
-                // Építse fel a fájl elérési útját a feltöltési könyvtár elérési útjának 
-                // és a feltöltött fájl nevének összefűzésével.
                 /**
                  * A feltöltött CSV-fájl elérési útja.
+                 * Felépíti a fájl elérési útját a feltöltési könyvtár elérési útjának 
+                 * és a feltöltött fájl nevének összefűzésével.
                  *
                  * @var string
                  */
                 $fileWithPath = public_path('uploads') . '/' . $fileName;
 
-                // Ellenőrizze, hogy a fájl létezik-e már a megadott elérési úton
-                // Ha a fájl nem létezik, helyezze át a feltöltött fájlt a megadott elérési útra
+                /**
+                 * Ellenőrzi, hogy a fájl létezik-e már a megadott elérési úton.
+                 * Ha a fájl nem létezik, helyezze át a feltöltött fájlt a megadott elérési útra
+                 */
                 if( !file_exists($fileWithPath) ) {
                     /**
                      * Áthelyezi a feltöltött fájlt a megadott útvonalra.
@@ -113,11 +114,13 @@ class UploadController extends Controller
                  * @var array
                  */
                 $dataFromCsv = [];
-
-                //$records = array_map('str_getcsv', file($fileWithPath));
                 
                 /**
                  * A CSV-rekordokat tömbök tömbjéhez rendeli hozzá.
+                 * Az array_map függvény a megadott visszahívási függvényt alkalmazza a tömb minden elemére.
+                 * Ebben az esetben a visszahívási függvény egy névtelen függvény, amely a $separator változót használja
+                 * hogy a rekordot értékek tömbjére ossza fel.
+                 * Az eredmény egy tömbtömb, ahol minden belső tömb egy rekordot jelent.
                  *
                  * @param string $separator A CSV-fájlban használt elválasztó.
                  * @return array Tömbök tömbje, ahol minden belső tömb egy rekordot jelöl.
@@ -126,10 +129,7 @@ class UploadController extends Controller
                     // Hívja az str_getcsv-t az elválasztóval a rekord tömbre való felosztásához
                     return str_getcsv($v, $separator);
                 }, file($fileWithPath));
-                // Az array_map függvény a megadott visszahívási függvényt alkalmazza a tömb minden elemére.
-                // Ebben az esetben a visszahívási függvény egy névtelen függvény, amely a $separator változót használja
-                // hogy a rekordot értékek tömbjére ossza fel.
-                // Az eredmény egy tömbtömb, ahol minden belső tömb egy rekordot jelent.
+                
 
                 /**
                  * Tárolja a CSV-fájl fejlécét.
@@ -143,29 +143,38 @@ class UploadController extends Controller
                 // Végigjárja a CSV-fájl minden rekordját
                 foreach($records as $record) {
                     $dataFromCsv[] = array_combine($header, $record);
-                    /**
-                     * Check if the header is not set.
-                     * Ha a fejléc nincs beállítva, állítsa be az aktuális rekordra.
-                     * Ellenkező esetben adja hozzá a rekordot a dataFromCsv tömbhöz.
-                     */
-                //    if( !$header ) {
-                        // Set the header to the current record
-                //        $header = $record;
-                //    }
-                //    else {
-                        // Add the record to the dataFromCsv array
-                //        $dataFromCsv[] = $record;
-                //    }
                 }
             }
             
-            // Felosztja az adattömböt kisebb, egyenként 300 rekordot tartalmazó tömbre
+            /**
+             * Felosztja az adattömböt kisebb, egyenként 300 rekordot tartalmazó tömbre.
+             *
+             * Az array_chunk függvény az adattömböt osztja fel 300 rekordonként. Ezzel biztosítjuk, hogy a
+             * CSV-fájl tartalmát a munkamenetekben kezeljük, és ne egy nagy tömb alakjában.
+             * A felosztott tömbökben minden rekordon egy személy adatokat tárolunk.
+             *
+             * @param array $dataFromCsv Az adattömb.
+             * @return array Tömb, ahol minden belső tömb 300 rekordonként osztott adatokat tartalmaz.
+             */
             $dataFromCsv = array_chunk($dataFromCsv, 300);
             
-            // Hozzon létre egy új üres köteget, és küldje el a tételt.
+            /**
+             * Hozzon létre egy új üres köteget, és küldje el a tételt.
+             *
+             * A Bus::batch függvény segítségével hozzuk létre a munkamenetet, amely a CSV-fájl tartalmát feldolgozza.
+             * A dispatch függvényt használjuk a munkamenet tételére, amelyen keresztül a személyeket tartalmazó tömböt feldolgozza.
+             * A tétel a ProcessPersons osztály egy példányára hivatkozik, amely a személyeket tartalmazó tömböt feldolgozza.
+             *
+             * @var \Illuminate\Contracts\Queue\Queue A munkamenet, amely a CSV-fájl tartalmát feldolgozza.
+             */
             $batch = Bus::batch([])->dispatch();
             
-            // A személyeket tartalmazó tömb.
+            /**
+             * A személyeket tartalmazó tömb. Ebben a tömbben minden rekordon egy személy adatokat tartalmaz.
+             * A tömböt a CSV-fájl tartalmából konvertáljuk, és a munkamenetekben kezeljük.
+             *
+             * @var array $personsData
+             */
             $personsData = [];
             
             /**
@@ -179,15 +188,31 @@ class UploadController extends Controller
              */
             foreach( $dataFromCsv as $index => $dataCsv ) {
                 foreach( $dataCsv as $data ) {
+                    /**
+                     * Töltse fel a személyadatokat a $personsData tömbbe.
+                     *
+                     * A $header tömbben a CSV-fájl mezőinek nevei találhatók,
+                     * míg a $data tömbben a mezők értékei.
+                     * Az array_combine függvényt használjuk, hogy a mezőneveken alapuló kulcsokkal
+                     * rendelje a személyadatokat a tömbbe.
+                     *
+                     * @param array $header A CSV-fájl mezőinek nevei.
+                     * @param array $data A mezők értékei.
+                     */
                     $personsData[$index][] = array_combine($header, $data);
                 }
                 
                 /**
                  * Adjon hozzá egy új ProcessPersons-feladatot a köteghez. 
-                 * Paraméterként adja át a személyadatok darabját.
+                  *
+                  * Paraméterként átadja a személyadatok darabját, amelyet
+                  * a ProcessPersons-jobb a feladatban kezel.
+                  *
+                  * @param array $personsData A személyadatok darabja, amelyet
+                  *                            a ProcessPersons-jobb feldolgoz.
+                  *
                  */
                 $batch->add(new ProcessPersons($personsData[$index]));
-                //ProcessPersons::dispatch($personsData[$index]);
             }
             
             /**
@@ -232,14 +257,46 @@ class UploadController extends Controller
     public function progressForCsvStoreProcess(Request $request)
     {
         try{
-            // Szerezze be a kötegazonosítót a kérelemből vagy a munkamenetből
+            /**
+             * Szerezze be a kötegazonosítót a kérelemből vagy a munkamenetből.
+             * 
+             * Ha a kérelemben megadott 'id' paraméter szerepel, akkor ezt használjuk.
+             * Ha nem, akkor a munkamenetből szerezze be az utolsó kötegazonosítóját.
+             * 
+             * @var string $batchId A CSV-tárolási folyamatban részt vevő köteg azonosítója.
+             */
             $batchId = $request->id ?? session()->get('lastBatchId');
 
+
             // Ellenőrizze, hogy létezik-e a megadott azonosítóval rendelkező köteg
-            if(JobBatch::where('id', $batchId)->count()) {
+            
+            
+            
+            /**
+             * Ellenőrizze, hogy létezik-e a megadott azonosítóval rendelkező köteg.
+             * 
+             * Ha igen, akkor számolja meg a kötegazonosítóval rendelkező kötegek számát.
+             * 
+             * @var int $count A kötegek száma a megadott azonosítóval rendelkező kötegek között.
+             */
+            if( ( $count = JobBatch::where('id', $batchId)->count() ) ) {
+                /**
+                 * Szerezze be a megadott azonosítóval rendelkező köteg részleteit.
+                 * 
+                 * Ha létezik a megadott azonosítóval rendelkező köteg, akkor ezt a köteget
+                 * visszaadja a JSON-válaszként.
+                 * 
+                 * @var array $response A megadott azonosítóval rendelkező köteg részletei.
+                 */
                 $response = JobBatch::where('id', $batchId)->first();
                 
-                // Adja vissza a köteg részleteit JSON-válaszként
+                /**
+                 * Visszaadja a megadott azonosítóval rendelkező köteg részleteit JSON-válaszként.
+                 *
+                 * @var array $response A megadott azonosítóval rendelkező köteg részletei.
+                 *
+                 * @return \Illuminate\Http\JsonResponse    A köteg részleteit tartalmazó JSON-válasz.
+                 */
                 return response()->json($response);
             }
         }catch( \Exception $e ){
@@ -249,25 +306,57 @@ class UploadController extends Controller
         }
     }
 
+    /**
+     * Importálja a megadott CSV fájlt.
+     *
+     * Ha a kérésben van fájl, akkor megkeresi a fájl nevet, és megpróbálja 
+     * letenni azt a 'uploads' mappába. Ha a fájl már létezik, akkor nem teszi 
+     * le újra. Ezután importálja a fájlt a PersonImport osztályhoz használva.
+     *
+     * @param Request $request A HTTP kérés objektuma.
+     *
+     * @return \Illuminate\Http\RedirectResponse Visszaadja az importálás eredményét.
+     */
     public function import(Request $request)
     {
+        /**
+         * Ellenorizza, hogy van-e fájl a kérésben.
+         *
+         * @var \Illuminate\Http\Request $request A HTTP kérés objektuma.
+         *
+         * @return void
+         */
         if($request->has('file')) {
+            /**
+                 * A feltöltött CSV-fájl eredeti neve.
+                 * A getClientOriginalName() metódust használjuk a feltöltött fájl
+                 * eredeti nevének lekérésére. Ez azért hasznos, mert lehetővé teszi,
+                 * hogy a fájlt az eredeti nevével tároljuk, és ne csak véletlenszerűen 
+                 * generált nevet használjunk
+                 *
+                 * @var string
+                 */
             $fileName = $request->file->getClientOriginalName();
+            /**
+                 * A feltöltött CSV-fájl elérési útja.
+                 * Felépíti a fájl elérési útját a feltöltési könyvtár elérési útjának 
+                 * és a feltöltött fájl nevének összefűzésével.
+                 *
+                 * @var string
+                 */
             $fileWithPath = public_path('uploads') . '/' . $fileName;
             
+            // Nem teszi le újra a fájlt, ha már létezik.
             if( !file_exists($fileWithPath) ) {
-                //
+                // Mozgassa a fájlt a 'uploads' mappába.
                 $request->file->move(public_path('uploads'), $fileName);
             }
         }
         
+        // Importálja a megadott CSV fájlt a PersonImport osztályhoz használva.
         Excel::import(new PersonImport(), $fileWithPath);
         
-        
-        //$file = $request->file('file');
-        //dd($file);
-        //Excel::import(new PersonImport(), $file);
-        
+        // Visszaadja az importálás eredményét, és jelenítsen meg egy sikeres üzenetet.
         return back()->with('success', 'CSV fájl importálása sikeres.');
     }
     
