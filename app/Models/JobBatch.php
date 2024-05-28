@@ -11,5 +11,9 @@ class JobBatch extends Model
 
     protected $table = 'job_batches';
 
-    protected $guarded = [];
+    protected $guarded = [
+        'id', 'name', 'total_jobs', 
+        'pending_jobs','failed_jobs','failed_job_id',
+        'options','cancelled_at'
+    ];
 }

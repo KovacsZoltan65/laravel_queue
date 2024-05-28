@@ -267,11 +267,6 @@ class UploadController extends Controller
              */
             $batchId = $request->id ?? session()->get('lastBatchId');
 
-
-            // Ellenőrizze, hogy létezik-e a megadott azonosítóval rendelkező köteg
-            
-            
-            
             /**
              * Ellenőrizze, hogy létezik-e a megadott azonosítóval rendelkező köteg.
              * 
@@ -328,35 +323,60 @@ class UploadController extends Controller
          */
         if($request->has('file')) {
             /**
-                 * A feltöltött CSV-fájl eredeti neve.
-                 * A getClientOriginalName() metódust használjuk a feltöltött fájl
-                 * eredeti nevének lekérésére. Ez azért hasznos, mert lehetővé teszi,
-                 * hogy a fájlt az eredeti nevével tároljuk, és ne csak véletlenszerűen 
-                 * generált nevet használjunk
-                 *
-                 * @var string
-                 */
+             * A feltöltött CSV-fájl eredeti neve.
+             * A getClientOriginalName() metódust használjuk a feltöltött fájl
+             * eredeti nevének lekérésére. Ez azért hasznos, mert lehetővé teszi,
+             * hogy a fájlt az eredeti nevével tároljuk, és ne csak véletlenszerűen 
+             * generált nevet használjunk
+             *
+             * @var string
+             */
             $fileName = $request->file->getClientOriginalName();
             /**
-                 * A feltöltött CSV-fájl elérési útja.
-                 * Felépíti a fájl elérési útját a feltöltési könyvtár elérési útjának 
-                 * és a feltöltött fájl nevének összefűzésével.
-                 *
-                 * @var string
-                 */
+             * A feltöltött CSV-fájl elérési útja.
+             * Felépíti a fájl elérési útját a feltöltési könyvtár elérési útjának 
+             * és a feltöltött fájl nevének összefűzésével.
+             *
+             * @var string
+             */
             $fileWithPath = public_path('uploads') . '/' . $fileName;
             
-            // Nem teszi le újra a fájlt, ha már létezik.
+            /**
+             * Ellenorizza, hogy a fájl már létezik-e a 'uploads' mappában.
+             * Ha nem létezik, akkor tesszük le.
+             *
+             * @var string $fileWithPath A CSV-fájl elérési útja.
+             *
+             * @return void
+             */
             if( !file_exists($fileWithPath) ) {
-                // Mozgassa a fájlt a 'uploads' mappába.
+            
+                /**
+                 * Mozgassa a fájlt a 'uploads' mappába.
+                 *
+                 * @param \Illuminate\Http\Request $request A HTTP kérés objektuma.
+                 * @param string $fileName A feltöltött fájl neve.
+                 *
+                 * @return void
+                 */
                 $request->file->move(public_path('uploads'), $fileName);
             }
         }
         
-        // Importálja a megadott CSV fájlt a PersonImport osztályhoz használva.
+        /**
+         * Importálja a megadott CSV fájlt a PersonImport osztályhoz használva.
+         *
+         * @param string $fileWithPath A CSV-fájl elérési útja.
+         *
+         * @return void
+         */
         Excel::import(new PersonImport(), $fileWithPath);
         
-        // Visszaadja az importálás eredményét, és jelenítsen meg egy sikeres üzenetet.
+        /**
+         * Visszaadja az importálás eredményét, és jelenítsen meg egy sikeres üzenetet.
+         *
+         * @return \Illuminate\Http\RedirectResponse Visszaadja az importálás eredményét.
+         */
         return back()->with('success', 'CSV fájl importálása sikeres.');
     }
     

@@ -22,6 +22,10 @@ php artisan queue:work
 
 IMPORTÁLÁS
 
+// -------------
+// maatwebsite/excel
+// https://laravel-excel.com/
+// -------------
 composer require maatwebsite/excel
 php artisan vendor:publish --provider="Maatwebsite\Excel\ExcelServiceProvider"
 php artisan make:import PersonImport --model=Person
