@@ -15,7 +15,7 @@ php artisan make:model JobBatch
 // -------------
 // SZOLGÁLTATÓK
 // -------------
-php artisan serve
+php artisan serve | php -S localhost:8000 -t public/
 php artisan queue:work
 
 00:57:00
