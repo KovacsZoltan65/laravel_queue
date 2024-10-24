@@ -45,21 +45,39 @@ class ProcessPersons implements ShouldQueue
         {
             foreach( $this->personsData as $person )
             {
+\Log::info('ProcessPersons@handle  $person: ' . print_r($person, true));
                 // Hozzon létre egy új személymodell példányt a megadott személyadatokkal.
-                \App\Models\Person::create($person);
+                //\App\Models\Person::create($person);
                 
-                // Létrehozás vagy frissítés
-                //\App\Models\Person::updateOrCreate(
-                //    ['name' => $person->name, 'email' => $person->email], 
-                //    ['password' => $person->password]
-                //);
+                //$old_person = \App\Models\Person::get(['email' => $person->email]);
+               
+                
+                /**
+                 * Létrehozza vagy frissíti a személymodell-példányt a megadott személyadatokkal.
+                 * A létrehozás vagy frissítés funkciót a Laravel Eloquent ORM updateOrCreate metódusa biztosítja.
+                 * 
+                 * @param array $attributes A létrehozandó vagy frissítendő személy adatai.
+                 * @param array $values A frissítendő személy adatai.
+                 * @return \App\Models\Person A létrehozott vagy frissített személymodell-példány.
+                 */
+                $person = \App\Models\Person::updateOrCreate(
+                    // A létrehozás vagy frissítés alapját képezi a személy neve és email címe.
+                    ['name' => $person['name'], 'email' => $person['email']], 
+                    // A frissítendő személy adatai.
+                    [
+                        'name' => $person['name'], 
+                        'email' => $person['email'], 
+                        'password' => $person['password']
+                    ]
+                );
+//\Log::info('ProcessPersons@handle  $person: ' . print_r($person, true));
             }
         }
         catch( \Exception $e )
         {
             // Naplózza a hibaüzenetet, és állítsa le a szkript végrehajtását.
-            \Log::info('ProcessPersons@handle error: ' . print_r($e->getMessage(), true));
-            dd($e->getMessage());
+            \Log::error('ProcessPersons@handle error: ' . print_r($e->getMessage(), true));
+            //dd($e->getMessage());
         }
     }
 }

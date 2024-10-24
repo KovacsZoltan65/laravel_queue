@@ -1,8 +1,11 @@
 <?php
 
 /*
-    php artisan generate:csv -R 1000
+ * php artisan generate:csv -R 1000
  * php artisan generate:csv --record_count=1000
+ * php artisan generate:csv --record_count=10000
+ * php artisan generate:csv --record_count=50000
+ * php artisan generate:csv --record_count=100000
  */
 
 namespace App\Console\Commands;
@@ -16,8 +19,7 @@ class GenerateCsv extends Command
      *
      * @var string
      */
-    protected $signature = 'generate:csv '
-            . '{--R|record_count= : Rekordok száma}';
+    protected $signature = "generate:csv {--R|record_count= : Rekordok száma}";
 
     /**
      * The console command description.
@@ -33,7 +35,7 @@ class GenerateCsv extends Command
     {
         $record_count = $this->option('record_count');
         $file_name = 'data_' . $record_count . '_' . date('Y-m-d-H-i-s') . '.csv';
-        
+
         $header = 'name;email;password';
         $data = $header . PHP_EOL;
         for( $i = 0; $i <= $record_count; $i++ )
@@ -41,7 +43,7 @@ class GenerateCsv extends Command
             $name = fake()->name();
             $email = fake()->email();
             $password = 'Pa$$w0rd';
-            
+
             $data .= $name . ';' . $email. ';'. $password . PHP_EOL;
         }
         //dd($data);

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Person;
 use Illuminate\Database\Seeder;
 
 class PersonsSeeder extends Seeder
@@ -19,7 +19,7 @@ class PersonsSeeder extends Seeder
         $this->command->getOutput()->progressStart( $count );
         for( $i = 0; $i < $count; $i++ )
         {
-            \App\Models\Person::factory(1)->create();
+            Person::factory(1)->create();
 
             $this->command->getOutput()->progressAdvance();
         }

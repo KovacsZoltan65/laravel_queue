@@ -22,11 +22,13 @@ Route::get('/', function () {
 Route::get(
     '/upload', 
     [UploadController::class, 'index']);
+
 Route::get(
     '/progress', 
     [UploadController::class, 'progress']
 );
 
+// Feltöltés
 Route::post(
     '/upload/file', 
     [UploadController::class, 'uploadAndStore']
